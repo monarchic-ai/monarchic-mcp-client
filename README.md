@@ -4,6 +4,40 @@
 start this package locally, and the shim forwards MCP JSON-RPC requests to the
 Monarchic-MCP endpoint running in infrastructure.
 
+## Environment test shells
+
+The repository dev shells fetch the tenant-bound infrastructure test API key
+from AWS Secrets Manager at shell entry. The key is exported only into the
+shell environment and is never evaluated into the Nix store or written to a
+local file.
+
+Refresh the repository-managed AWS SSO profiles when needed:
+
+```sh
+cd ../monarchic-infra
+nix run .#aws-sso-login-all
+cd ../monarchic-mcp-client
+```
+
+Enter the dev environment, which is also the default shell:
+
+```sh
+nix develop .#dev
+pnpm smoke:hosted
+```
+
+Enter staging explicitly:
+
+```sh
+nix develop .#staging
+pnpm smoke:hosted
+```
+
+The shells set `MONARCHIC_API_BASE_URL`, `MONARCHIC_TENANT_ID`,
+`MONARCHIC_MCP_SMOKE_TENANT_ID`, and `MONARCHIC_API_KEY` for the selected
+environment. Set `MONARCHIC_AUTO_LOAD_TEST_KEY=0` before entering a shell to
+skip the Secrets Manager lookup for offline work or manual credentials.
+
 ## Usage
 
 ```json
@@ -74,4 +108,3 @@ Optional launch/follow inputs:
   launch response includes a run id.
 - `MONARCHIC_MCP_SMOKE_PROJECT_KEY`: project key required when launch is enabled.
 - `MONARCHIC_MCP_SMOKE_PROMPT`: custom launch prompt.
-
